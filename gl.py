@@ -116,13 +116,13 @@ class Renderer(object):
                 # El punto que se esta viendo es una esquina
                 return True
 
-            # El punto que se esta biendo está dentro de la figura tomando en cuenta la pendiente de  los puntos
+            # El punto que se esta viendo está dentro de la figura tomando en cuenta la pendiente de  los puntos
             if ((poly[i][1] > y) != (poly[j][1] > y)):
                 slope = (x-poly[i][0])*(poly[j][1]-poly[i][1]) - \
                     (poly[j][0]-poly[i][0])*(y-poly[i][1])
                 if slope == 0:
                     return True
-                # REvisa si el slope es una linea horizontal y por lo tanto seria considerado un boundary
+                # Revisa si el slope es una linea horizontal y por lo tanto seria considerado un boundary
                 if (slope < 0) != (poly[j][1] < poly[i][1]):
                     # Revisa si el punto que se está viendo está dentro de la figura
                     c = not c
@@ -130,8 +130,8 @@ class Renderer(object):
         return c
 
     def glFill(self, poly, clr=None):
-        for i in range(self.height):
-            for j in range(self.width):
+        for i in range(self.width):
+            for j in range(self.height):
                 if self.boundaries(i, j, poly):
                     self.glPoint(i, j, clr)
 
