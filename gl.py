@@ -1,9 +1,11 @@
 import struct
 import numpy as np
+import random
 from collections import namedtuple
+
 from obj import Obj
 
-V2 = namedtuple('Vertex2', ['x', 'y'])
+#V2 = namedtuple('Vertex2', ['x', 'y'])
 
 
 def char(c):
@@ -23,6 +25,21 @@ def dword(d):
 
 def color(r, g, b):
     return bytes([int(b*255), int(g*255), int(r*255)])
+
+
+def bc(A, B, C, P):
+
+    areaABC = (B[1] - C[1])*(A[0]-C[0]) + (C[0]-B[0])*(A[1]-C[1])
+
+    areaPBC = (B[1]-C[1])*(P[0]-C[0]) + (C[0]-B[0])*(P[1]-C[1])
+
+    areaPAC = (C[1]-A[1])*(P[0]-A[0]) + (A[0]-C[0])*(P[1]-A[1])
+
+    u = areaPBC / areaABC
+    v = areaPAC / areaABC
+    w = 1 - u - v
+
+    return u, v, w
 
 
 class Renderer(object):
@@ -87,8 +104,8 @@ class Renderer(object):
         else:
             stepy = 1
 
-        dx2 = dx << 1
-        dy2 = dy << 1
+        dx2 = int(dx) << 1
+        dy2 = int(dy) << 1
 
         if dx > dy:
             fraction = dy2 - dx
@@ -108,6 +125,60 @@ class Renderer(object):
                     fraction -= dy2
                 y0 += stepy
                 fraction += dx2
+
+    def glLineC(self, x0, y0, x1, y1, clr=None):
+        # Bresenham line algorithm
+        # y = m * x + b
+
+        # Si el punto0 es igual al punto 1, dibujar solamente un punto
+        if x0 == x1 and y0 == y1:
+            self.glPoint(x0, y0, clr)
+            return
+
+        dy = abs(y1 - y0)
+        dx = abs(x1 - x0)
+
+        steep = dy > dx
+
+        # Si la linea tiene pendiente mayor a 1 o menor a -1
+        # intercambio las x por las y, y se dibuja la linea
+        # de manera vertical
+        if steep:
+            x0, y0 = y0, x0
+            x1, y1 = y1, x1
+
+        # Si el punto inicial X es mayor que el punto final X,
+        # intercambio los puntos para siempre dibujar de
+        # izquierda a derecha
+        if x0 > x1:
+            x0, x1 = x1, x0
+            y0, y1 = y1, y0
+
+        dy = abs(y1 - y0)
+        dx = abs(x1 - x0)
+
+        offset = 0
+        limit = 0.5
+        m = dy / dx
+        y = y0
+
+        for x in range(x0, x1 + 1):
+            if steep:
+                # Dibujar de manera vertical
+                self.glPoint(y, x, clr)
+            else:
+                # Dibujar de manera horizontal
+                self.glPoint(x, y, clr)
+
+            offset += m
+
+            if offset >= limit:
+                if y0 < y1:
+                    y += 1
+                else:
+                    y -= 1
+
+                limit += 1
 
     def boundaries(self, x: int, y: int, poly) -> bool:
         num = len(poly)
@@ -137,8 +208,8 @@ class Renderer(object):
                 if self.boundaries(i, j, poly):
                     self.glPoint(i, j, clr)
 
-    def glFillTriangle(self, v0,v1,v2, clr=None):
-        #Scan Algorithm
+    def glFillTriangle(self, v0, v1, v2, clr=None):
+        # Scan Algorithm
 
         if v0[1] < v1[1]:
             v0, v1 = v1, v0
@@ -147,27 +218,22 @@ class Renderer(object):
         if v1[1] < v2[1]:
             v1, v2 = v2, v1
 
-        def flattBottom(vA,vB,vC):
+        def flattBottom(vA, vB, vC):
             try:
                 slopeAB = (vB[0]-vA[0])/(vB[1]-vA[1])
                 slopeAC = (vC[0]-vA[0])/(vC[1]-vA[1])
             except ZeroDivisionError:
                 pass
             else:
-            #slopeAB = (vB[1]-vA[1])/(vB[0]-vA[0])
-            #slopeAC = (vC[1]-vA[1])/(vC[0]-vA[0])
+                x0 = vB[0]
+                x1 = vC[0]
 
-                x0 = v1[0]
-                x1 = v2[1]
-
-                for y in range(v1[1],v0[1]+1):
-                    self.glLine(int(x0), y, int(x1), y, clr)
+                for y in range(int(vB[1]), int(vA[1])):
+                    self.glLineC(int(x0), y, int(x1), y, clr)
                     x0 += slopeAB
                     x1 += slopeAC
-                    if x0 > x1:
-                        x0, x1 = x1, x0
 
-        def flattTop(vA,vB,vC):
+        def flattTop(vA, vB, vC):
             try:
                 slopeCA = (vC[0]-vA[0])/(vC[1]-vA[1])
                 slopeCB = (vC[0]-vB[0])/(vC[1]-vB[1])
@@ -177,36 +243,38 @@ class Renderer(object):
                 x0 = vA[0]
                 x1 = vB[0]
 
-                for y in range(vA[1],vC[1],-1):
-                    self.glLine(int(x0), y, int(x1), y, clr)
+                for y in range(int(vA[1]), int(vC[1]), -1):
+
+                    self.glLineC(int(x0), y, int(x1), y, clr)
                     x0 -= slopeCA
                     x1 -= slopeCB
-                    if x0 > x1:
-                        x0, x1 = x1, x0
 
         if v1[1] == v2[1]:
-            #Parte plana abajo
-            flattBottom(v0,v1,v2)
-            
+            # Parte plana abajo
+            flattBottom(v0, v1, v2)
+
         elif v0[1] == v1[1]:
-            #Parte plana arriba
+            # Parte plana arriba
 
-            flattTop(v0,v1,v2)
+            flattTop(v0, v1, v2)
         else:
-            # Se parte 
-            #Teorema de intercepto
+            # Se parte
+            # Teorema de intercepto
 
-            vD = [v0[0] + ((v1[1]-v0[1])/(v2[1]-v0[1])) * (v2[0]-v0[0]),v1[1]]
+            vD = [v0[0] + ((v1[1]-v0[1])/(v2[1]-v0[1])) * (v2[0]-v0[0]), v1[1]]
 
-            flattBottom(v0,v1,vD)
-            flattTop(v1,vD,v2)
+            flattBottom(v0, v1, vD)
+            flattTop(v1, vD, v2)
             pass
 
-        self.glLine(v0[0],v0[1],v1[0],v1[1],clr)
-        self.glLine(v1[0],v1[1],v2[0],v2[1],clr)
-        self.glLine(v2[0],v2[1],v0[0],v0[1],clr)
+        self.glLine(int(v0[0]), int(v0[1]), int(
+            v1[0]), int(v1[1]), color(0, 0, 0))
+        self.glLine(int(v1[0]), int(v1[1]), int(
+            v2[0]), int(v2[1]), color(0, 0, 0))
+        self.glLine(int(v2[0]), int(v2[1]), int(
+            v0[0]), int(v0[1]), color(0, 0, 0))
 
-    def glLoadModel2(self,filename):
+    def glLoadModel2(self, filename):
         model = Obj(filename)
 
         for face in model.faces:
@@ -220,55 +288,68 @@ class Renderer(object):
                 y2 = model.vertices[f2 - 1][1]
                 self.glLine(x1, y1, x2, y2)
 
-
-    def glLoadModel(self,filename,translate,rotate,scale):
+    def glLoadModel(self, filename, translate=[0, 0, 0], rotate=[0, 0, 0], scale=[1, 1, 1]):
         model = Obj(filename)
+
         modelMatrix = self.glCreateObjectMatrix(translate, rotate, scale)
 
         for face in model.faces:
+
             vertCount = len(face)
-            for vert in range(vertCount):
-                v0 = model.vertices[ face[vert][0] - 1]
-                v1 = model.vertices[ face[(vert + 1) % vertCount][0] - 1]
+            v0 = model.vertices[face[0][0] - 1]
+            v1 = model.vertices[face[1][0] - 1]
+            v2 = model.vertices[face[2][0] - 1]
 
-                v0 = self.glTransform(v0, modelMatrix)
-                v1 = self.glTransform(v1, modelMatrix)
+            v0 = self.glTransform(v0, modelMatrix)
+            v1 = self.glTransform(v1, modelMatrix)
+            v2 = self.glTransform(v2, modelMatrix)
 
-                self.glLine(v0[0], v0[1], v1[0], v1[1])
-
-    def glCreateObjectMatrix2(self, translate, rotate, scale):
-        modelMatrix = np.identity(4)
-        modelMatrix = self.glTranslate(modelMatrix, translate)
-        modelMatrix = self.glRotate(modelMatrix, rotate)
-        modelMatrix = self.glScale(modelMatrix, scale)
-        return modelMatrix
+            self.glFillTriangle(v0, v1, v2, self.currentColor)
 
     def glTransform(self, vertex, matrix):
 
-        v = V4(vertex[0], vertex[1], vertex[2], 1)
+        v = [vertex[0], vertex[1], vertex[2], 1]
         vt = matrix @ v
         vt = vt.tolist()[0]
-        vf = V3(vt[0] / vt[3],
-                vt[1] / vt[3],
-                vt[2] / vt[3])
+        vf = [vt[0] / vt[3],
+              vt[1] / vt[3],
+              vt[2] / vt[3]]
 
         return vf
 
-    def glCreateObjectMatrix(self, translate, rotate , scale):
+    def glCreateObjectMatrix(self, translate, rotate, scale):
 
-            translation = np.matrix([[1, 0, 0, translate.x],
-                                    [0, 1, 0, translate.y],
-                                    [0, 0, 1, translate.z],
-                                    [0, 0, 0, 1]])
+        translation = np.matrix([[1, 0, 0, translate[0]],
+                                 [0, 1, 0, translate[1]],
+                                 [0, 0, 1, translate[2]],
+                                 [0, 0, 0, 1]])
 
-            rotation = np.identity(4)
+        rotation = np.identity(4)
 
-            scaleMat = np.matrix([[scale.x, 0, 0, 0],
-                                [0, scale.y, 0, 0],
-                                [0, 0, scale.z, 0],
-                                [0, 0, 0, 1]])
+        scaleMat = np.matrix([[scale[0], 0, 0, 0],
+                              [0, scale[1], 0, 0],
+                              [0, 0, scale[2], 0],
+                              [0, 0, 0, 1]])
 
-            return translation * rotation * scaleMat
+        return translation * rotation * scaleMat
+
+    def glTriangle_bc(self, A, B, C, clr=None):
+        # bounding box
+        minX = min(A[0], B[0], C[0])
+        minY = min(A[1], B[1], C[1])
+        maxX = min(A[0], B[0], C[0])
+        maxY = min(A[1], B[1], C[1])
+
+        for x in range(minX, maxX+1):
+            for y in range(minY, maxY+1):
+                pep = [x, y]
+                u, v, w = bc(A, B, C, pep)
+
+                if u >= 0 and v >= 0 and w >= 0:
+                    if clr is None:
+                        self.glPoint(x, y)
+                    else:
+                        self.glPoint(x, y, clr)
 
     def glFinish(self, filenames):
 
@@ -297,4 +378,3 @@ class Renderer(object):
             for y in range(self.height):
                 for x in range(self.width):
                     file.write(self.pixels[x][y])
-        
