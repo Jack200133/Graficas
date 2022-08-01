@@ -1,8 +1,8 @@
 import struct
-import numpy as np
+import math
 import random
 from collections import namedtuple
-
+from mate import producto_matrices, producto_matriz_vector
 from obj import Obj
 
 #V2 = namedtuple('Vertex2', ['x', 'y'])
@@ -229,7 +229,8 @@ class Renderer(object):
                 x1 = vC[0]
 
                 for y in range(int(vB[1]), int(vA[1])):
-                    self.glLineC(int(x0), y, int(x1), y, clr)
+                    self.glLineC(int(x0), y, int(x1), y, color(
+                        random.random(), random.random(), random.random()))
                     x0 += slopeAB
                     x1 += slopeAC
 
@@ -245,7 +246,8 @@ class Renderer(object):
 
                 for y in range(int(vA[1]), int(vC[1]), -1):
 
-                    self.glLineC(int(x0), y, int(x1), y, clr)
+                    self.glLineC(int(x0), y, int(x1), y, color(
+                        random.random(), random.random(), random.random()))
                     x0 -= slopeCA
                     x1 -= slopeCB
 
@@ -267,26 +269,27 @@ class Renderer(object):
             flattTop(v1, vD, v2)
             pass
 
+        # self.glLine(int(v0[0]), int(v0[1]), int(
+        #     v1[0]), int(v1[1]), color(0, 0, 0))
+        # self.glLine(int(v1[0]), int(v1[1]), int(
+        #     v2[0]), int(v2[1]), color(0, 0, 0))
+        # self.glLine(int(v2[0]), int(v2[1]), int(
+        #     v0[0]), int(v0[1]), color(0, 0, 0))
+
+    def gloutTriangle(self, v0, v1, v2, clr=None):
+        # Scan Algorithm
+        if v0[1] < v1[1]:
+            v0, v1 = v1, v0
+        if v0[1] < v2[1]:
+            v0, v2 = v2, v0
+        if v1[1] < v2[1]:
+            v1, v2 = v2, v1
         self.glLine(int(v0[0]), int(v0[1]), int(
-            v1[0]), int(v1[1]), color(0, 0, 0))
+            v1[0]), int(v1[1]), clr)
         self.glLine(int(v1[0]), int(v1[1]), int(
-            v2[0]), int(v2[1]), color(0, 0, 0))
+            v2[0]), int(v2[1]), clr)
         self.glLine(int(v2[0]), int(v2[1]), int(
-            v0[0]), int(v0[1]), color(0, 0, 0))
-
-    def glLoadModel2(self, filename):
-        model = Obj(filename)
-
-        for face in model.faces:
-            vcount = len(face)
-            for j in range(vcount):
-                f1 = face[j][0]
-                f2 = face[(j+1) % vcount][0]
-                x1 = model.vertices[f1 - 1][0]
-                y1 = model.vertices[f1 - 1][1]
-                x2 = model.vertices[f2 - 1][0]
-                y2 = model.vertices[f2 - 1][1]
-                self.glLine(x1, y1, x2, y2)
+            v0[0]), int(v0[1]), clr)
 
     def glLoadModel(self, filename, translate=[0, 0, 0], rotate=[0, 0, 0], scale=[1, 1, 1]):
         model = Obj(filename)
@@ -309,47 +312,51 @@ class Renderer(object):
     def glTransform(self, vertex, matrix):
 
         v = [vertex[0], vertex[1], vertex[2], 1]
-        vt = matrix @ v
-        vt = vt.tolist()[0]
+        vt = producto_matriz_vector(matrix, v)
+
         vf = [vt[0] / vt[3],
               vt[1] / vt[3],
               vt[2] / vt[3]]
 
         return vf
 
+    def glCreateRotationMatrix(self, pitch, yaw, roll):
+        pitch *= math.pi / 180
+        yaw *= math.pi / 180
+        roll *= math.pi / 180
+
+        pitchMatrix = [[1, 0, 0, 0],
+                       [0, math.cos(pitch), -math.sin(pitch), 0],
+                       [0, math.sin(pitch), math.cos(pitch), 0],
+                       [0, 0, 0, 1]]
+        yawnMatrix = [[math.cos(yaw), 0, math.sin(yaw), 0],
+                      [0, 1, 0, 0],
+                      [-math.sin(yaw), 0, math.cos(yaw), 0],
+                      [0, 0, 0, 1]]
+        rollMatrix = [[math.cos(roll), -math.sin(roll), 0, 0],
+                      [math.sin(roll), math.cos(roll), 0, 0],
+                      [0, 0, 1, 0],
+                      [0, 0, 0, 1]]
+
+        return producto_matrices(producto_matrices(pitchMatrix, yawnMatrix), rollMatrix)
+
     def glCreateObjectMatrix(self, translate, rotate, scale):
 
-        translation = np.matrix([[1, 0, 0, translate[0]],
-                                 [0, 1, 0, translate[1]],
-                                 [0, 0, 1, translate[2]],
-                                 [0, 0, 0, 1]])
+        translation = [[1, 0, 0, translate[0]],
+                       [0, 1, 0, translate[1]],
+                       [0, 0, 1, translate[2]],
+                       [0, 0, 0, 1]]
 
-        rotation = np.identity(4)
+        rotation = self.glCreateRotationMatrix(*rotate)
 
-        scaleMat = np.matrix([[scale[0], 0, 0, 0],
-                              [0, scale[1], 0, 0],
-                              [0, 0, scale[2], 0],
-                              [0, 0, 0, 1]])
+        scaleMat = [[scale[0], 0, 0, 0],
+                    [0, scale[1], 0, 0],
+                    [0, 0, scale[2], 0],
+                    [0, 0, 0, 1]]
 
-        return translation * rotation * scaleMat
-
-    def glTriangle_bc(self, A, B, C, clr=None):
-        # bounding box
-        minX = min(A[0], B[0], C[0])
-        minY = min(A[1], B[1], C[1])
-        maxX = min(A[0], B[0], C[0])
-        maxY = min(A[1], B[1], C[1])
-
-        for x in range(minX, maxX+1):
-            for y in range(minY, maxY+1):
-                pep = [x, y]
-                u, v, w = bc(A, B, C, pep)
-
-                if u >= 0 and v >= 0 and w >= 0:
-                    if clr is None:
-                        self.glPoint(x, y)
-                    else:
-                        self.glPoint(x, y, clr)
+        tr = producto_matrices(translation, rotation)
+        final = producto_matrices(tr, scaleMat)
+        return final
 
     def glFinish(self, filenames):
 
