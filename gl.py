@@ -316,6 +316,11 @@ class Renderer(object):
             col = color(random.random(), random.random(), random.random())
             self.glTriangle_bc(v0, v1, v2, col)
 
+            if vertCount == 4:
+                v3 = model.vertices[face[3][0] - 1]
+                v3 = self.glTransform(v3, modelMatrix)
+                self.glTriangle_bc(v0, v2, v3, col)
+
     def glTransform(self, vertex, matrix):
 
         v = [vertex[0], vertex[1], vertex[2], 1]
@@ -379,9 +384,10 @@ class Renderer(object):
                 if u >= 0 and v >= 0 and w >= 0:
 
                     z = v0[2] * u + v1[2] * v + v2[2] * w
-                    if z < self.zbuffer[x][y]:
-                        self.zbuffer[x][y] = z
-                        self.glPoint(x, y, clr)
+                    if x < self.width and y < self.height:
+                        if z < self.zbuffer[x][y]:
+                            self.zbuffer[x][y] = z
+                            self.glPoint(x, y, clr)
 
     def glFinish(self, filenames):
 
