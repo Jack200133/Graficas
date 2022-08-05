@@ -27,19 +27,23 @@ def color(r, g, b):
     return bytes([int(b*255), int(g*255), int(r*255)])
 
 
-def bc(A, B, C, P):
-
+def barycentric_coordinates(A, B, C, P):
     areaABC = (B[1] - C[1])*(A[0]-C[0]) + (C[0]-B[0])*(A[1]-C[1])
 
     areaPBC = (B[1]-C[1])*(P[0]-C[0]) + (C[0]-B[0])*(P[1]-C[1])
 
     areaPAC = (C[1]-A[1])*(P[0]-A[0]) + (A[0]-C[0])*(P[1]-A[1])
-
-    u = areaPBC / areaABC
-    v = areaPAC / areaABC
-    w = 1 - u - v
-
-    return u, v, w
+    try:
+        # PBC / ABC
+        u = areaPBC / areaABC
+        # PAC / ABC
+        v = areaPAC / areaABC
+        # 1 - u - v
+        w = 1 - u - v
+    except:
+        return -1, -1, -1
+    else:
+        return u, v, w
 
 
 class Renderer(object):
@@ -86,6 +90,8 @@ class Renderer(object):
 
     def glClear(self):
         self.pixels = [[self.clearColor for y in range(
+            self.height)] for x in range(self.width)]
+        self.zbuffer = [[float('inf') for y in range(
             self.height)] for x in range(self.width)]
 
     def glLine(self, x0, y0, x1, y1, crl=None):
@@ -218,6 +224,9 @@ class Renderer(object):
         if v1[1] < v2[1]:
             v1, v2 = v2, v1
 
+        colorst = color(
+            random.random(), random.random(), random.random())
+
         def flattBottom(vA, vB, vC):
             try:
                 slopeAB = (vB[0]-vA[0])/(vB[1]-vA[1])
@@ -229,8 +238,7 @@ class Renderer(object):
                 x1 = vC[0]
 
                 for y in range(int(vB[1]), int(vA[1])):
-                    self.glLineC(int(x0), y, int(x1), y, color(
-                        random.random(), random.random(), random.random()))
+                    self.glLineC(int(x0), y, int(x1), y, colorst)
                     x0 += slopeAB
                     x1 += slopeAC
 
@@ -246,8 +254,7 @@ class Renderer(object):
 
                 for y in range(int(vA[1]), int(vC[1]), -1):
 
-                    self.glLineC(int(x0), y, int(x1), y, color(
-                        random.random(), random.random(), random.random()))
+                    self.glLineC(int(x0), y, int(x1), y, colorst)
                     x0 -= slopeCA
                     x1 -= slopeCB
 
@@ -306,8 +313,8 @@ class Renderer(object):
             v0 = self.glTransform(v0, modelMatrix)
             v1 = self.glTransform(v1, modelMatrix)
             v2 = self.glTransform(v2, modelMatrix)
-
-            self.glFillTriangle(v0, v1, v2, self.currentColor)
+            col = color(random.random(), random.random(), random.random())
+            self.glTriangle_bc(v0, v1, v2, col)
 
     def glTransform(self, vertex, matrix):
 
@@ -357,6 +364,24 @@ class Renderer(object):
         tr = producto_matrices(translation, rotation)
         final = producto_matrices(tr, scaleMat)
         return final
+
+    def glTriangle_bc(self, v0, v1, v2, clr=None):
+        # bounding box
+        minX = round(min(v0[0], v1[0], v2[0]))
+        maxX = round(max(v0[0], v1[0], v2[0]))
+        minY = round(min(v0[1], v1[1], v2[1]))
+        maxY = round(max(v0[1], v1[1], v2[1]))
+
+        for x in range(minX, maxX+1):
+            for y in range(minY, maxY+1):
+                u, v, w = barycentric_coordinates(v0, v1, v2, [x, y])
+
+                if u >= 0 and v >= 0 and w >= 0:
+
+                    z = v0[2] * u + v1[2] * v + v2[2] * w
+                    if z < self.zbuffer[x][y]:
+                        self.zbuffer[x][y] = z
+                        self.glPoint(x, y, clr)
 
     def glFinish(self, filenames):
 
