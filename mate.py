@@ -1,3 +1,6 @@
+from math import sqrt
+
+
 def producto_matrices(a, b):
     filas_a = len(a)
     filas_b = len(b)
@@ -33,3 +36,29 @@ def producto_matriz_vector(a, b):
             suma += a[i][j]*b[j]
         producto.append(suma)
     return producto
+
+
+def producto_cruz(a, b):
+    return [a[1]*b[2] - a[2]*b[1],
+            a[2]*b[0] - a[0]*b[2],
+            a[0]*b[1] - a[1]*b[0]]
+
+
+def resta_vectores(a, b):
+    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+
+
+def normal_vector3(a):
+    return [a[0]/sqrt(a[0]**2 + a[1]**2 + a[2]**2),
+            a[1]/sqrt(a[0]**2 + a[1]**2 + a[2]**2),
+            a[2]/sqrt(a[0]**2 + a[1]**2 + a[2]**2)]
+
+
+def producto_punto(a, b):
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
+
+
+def inversa(a):
+    for i in range(len(a)):
+        a[i] = -a[i]
+    return a

@@ -1,8 +1,9 @@
 import struct
-import math
+from math import cos, sin, pi
 import random
-from collections import namedtuple
-from mate import producto_matrices, producto_matriz_vector
+from mate import producto_matrices, normal_vector3, producto_matriz_vector, resta_vectores, producto_cruz
+
+
 from obj import Obj
 
 #V2 = namedtuple('Vertex2', ['x', 'y'])
@@ -53,6 +54,9 @@ class Renderer(object):
         self.height = 4
 
         self.glViewPort(0, 0, 4, 4)
+
+        self.active_shader = None
+        self.dirLight = [1, 0, 0]
 
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)
@@ -313,13 +317,13 @@ class Renderer(object):
             v0 = self.glTransform(v0, modelMatrix)
             v1 = self.glTransform(v1, modelMatrix)
             v2 = self.glTransform(v2, modelMatrix)
-            col = color(random.random(), random.random(), random.random())
-            self.glTriangle_bc(v0, v1, v2, col)
+
+            self.glTriangle_bc(v0, v1, v2)
 
             if vertCount == 4:
                 v3 = model.vertices[face[3][0] - 1]
                 v3 = self.glTransform(v3, modelMatrix)
-                self.glTriangle_bc(v0, v2, v3, col)
+                self.glTriangle_bc(v0, v2, v3)
 
     def glTransform(self, vertex, matrix):
 
@@ -333,20 +337,20 @@ class Renderer(object):
         return vf
 
     def glCreateRotationMatrix(self, pitch, yaw, roll):
-        pitch *= math.pi / 180
-        yaw *= math.pi / 180
-        roll *= math.pi / 180
+        pitch *= pi / 180
+        yaw *= pi / 180
+        roll *= pi / 180
 
         pitchMatrix = [[1, 0, 0, 0],
-                       [0, math.cos(pitch), -math.sin(pitch), 0],
-                       [0, math.sin(pitch), math.cos(pitch), 0],
+                       [0, cos(pitch), -sin(pitch), 0],
+                       [0, sin(pitch), cos(pitch), 0],
                        [0, 0, 0, 1]]
-        yawnMatrix = [[math.cos(yaw), 0, math.sin(yaw), 0],
+        yawnMatrix = [[cos(yaw), 0, sin(yaw), 0],
                       [0, 1, 0, 0],
-                      [-math.sin(yaw), 0, math.cos(yaw), 0],
+                      [-sin(yaw), 0, cos(yaw), 0],
                       [0, 0, 0, 1]]
-        rollMatrix = [[math.cos(roll), -math.sin(roll), 0, 0],
-                      [math.sin(roll), math.cos(roll), 0, 0],
+        rollMatrix = [[cos(roll), -sin(roll), 0, 0],
+                      [sin(roll), cos(roll), 0, 0],
                       [0, 0, 1, 0],
                       [0, 0, 0, 1]]
 
@@ -377,6 +381,15 @@ class Renderer(object):
         minY = round(min(v0[1], v1[1], v2[1]))
         maxY = round(max(v0[1], v1[1], v2[1]))
 
+        triangleNormal = producto_cruz(
+            resta_vectores(v1, v0), resta_vectores(v2, v0))
+
+        triangleNormal = normal_vector3(triangleNormal)
+
+        # triangleNormal = np.cross(np.subtract(v1, v0), np.subtract(v2, v0))
+        # # normalizar
+        # triangleNormal = triangleNormal / np.linalg.norm(triangleNormal)
+
         for x in range(minX, maxX+1):
             for y in range(minY, maxY+1):
                 u, v, w = barycentric_coordinates(v0, v1, v2, [x, y])
@@ -387,7 +400,13 @@ class Renderer(object):
                     if x < self.width and y < self.height:
                         if z < self.zbuffer[x][y]:
                             self.zbuffer[x][y] = z
-                            self.glPoint(x, y, clr)
+
+                            if self.active_shader != None:
+                                r, g, b = self.active_shader(self, baryCoords=(
+                                    u, v, w), vcolor=clr or self.currentColor, triangleNormal=triangleNormal)
+                                self.glPoint(x, y, color(r, g, b))
+                            else:
+                                self.glPoint(x, y, clr)
 
     def glFinish(self, filenames):
 
