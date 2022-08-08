@@ -1,5 +1,6 @@
 from gl import Renderer, color
 from shaders import flat
+from texture import Texture
 
 render = Renderer()
 height = 1080
@@ -10,10 +11,10 @@ render.glColor(1, 1, 1)
 render.glClear()
 
 render.active_shader = flat
-
+render.active_texture = Texture("./rocket/rocket.bmp")
 render.glLoadModel("./rocket/rocket.obj",
                    translate=[width/2, height/2, 0],
                    rotate=[0, 180, 0],
                    scale=[2, 2, 2])
 #render.glFillTriangle([0, 0], [100, 100], [200, 0])
-render.glFinish("final.bmp")
+render.glFinish("sr4.bmp")

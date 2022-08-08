@@ -56,6 +56,7 @@ class Renderer(object):
         self.glViewPort(0, 0, 4, 4)
 
         self.active_shader = None
+        self.active_texture = None
         self.dirLight = [1, 0, 0]
 
         self.clearColor = color(0, 0, 0)
@@ -318,12 +319,22 @@ class Renderer(object):
             v1 = self.glTransform(v1, modelMatrix)
             v2 = self.glTransform(v2, modelMatrix)
 
-            self.glTriangle_bc(v0, v1, v2)
+            vt0 = model.texcoords[face[0][1] - 1]
+            vt1 = model.texcoords[face[1][1] - 1]
+            vt2 = model.texcoords[face[2][1] - 1]
+
+            vn0 = model.normals[face[0][2] - 1]
+            vn1 = model.normals[face[1][2] - 1]
+            vn2 = model.normals[face[2][2] - 1]
+
+            self.glTriangle_bc(v0, v1, v2,txtC=(vt0,vt1,vt2),normals=(vn0,vn1,vn2))
 
             if vertCount == 4:
                 v3 = model.vertices[face[3][0] - 1]
                 v3 = self.glTransform(v3, modelMatrix)
-                self.glTriangle_bc(v0, v2, v3)
+                vt3 = model.texcoords[face[3][1] - 1]
+                vn3 = model.normals[face[3][2] - 1]
+                self.glTriangle_bc(v0, v2, v3,txtC=(vt0,vt2,vt3),normals=(vn0,vn2,vn3))
 
     def glTransform(self, vertex, matrix):
 
@@ -374,7 +385,7 @@ class Renderer(object):
         final = producto_matrices(tr, scaleMat)
         return final
 
-    def glTriangle_bc(self, v0, v1, v2, clr=None):
+    def glTriangle_bc(self, v0, v1, v2,txtC =(),normals=(), clr=None):
         # bounding box
         minX = round(min(v0[0], v1[0], v2[0]))
         maxX = round(max(v0[0], v1[0], v2[0]))
@@ -402,8 +413,12 @@ class Renderer(object):
                             self.zbuffer[x][y] = z
 
                             if self.active_shader != None:
-                                r, g, b = self.active_shader(self, baryCoords=(
-                                    u, v, w), vcolor=clr or self.currentColor, triangleNormal=triangleNormal)
+                                r, g, b = self.active_shader(self, 
+                                                            baryCoords=(u, v, w), 
+                                                            vcolor=clr or self.currentColor, 
+                                                            texCoords = txtC,
+                                                            normals=normals,
+                                                            triangleNormal=triangleNormal)
                                 self.glPoint(x, y, color(r, g, b))
                             else:
                                 self.glPoint(x, y, clr)
