@@ -11,9 +11,9 @@ render.glClear()
 
 render.active_shader = flat
 
-render.glLoadModel("face.obj",
+render.glLoadModel("./rocket/rocket.obj",
                    translate=[width/2, height/2, 0],
                    rotate=[0, 180, 0],
-                   scale=[20, 20, 20])
+                   scale=[2, 2, 2])
 #render.glFillTriangle([0, 0], [100, 100], [200, 0])
 render.glFinish("final.bmp")

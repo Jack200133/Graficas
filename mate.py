@@ -59,6 +59,7 @@ def producto_punto(a, b):
 
 
 def inversa(a):
+    result = []
     for i in range(len(a)):
-        a[i] = -a[i]
-    return a
+        result.append(-a[i])
+    return result
