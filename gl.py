@@ -1,7 +1,7 @@
 import struct
-from math import cos, sin, pi
+from math import cos, sin, pi, tan
 import random
-from mate import producto_matrices, normal_vector3, producto_matriz_vector, resta_vectores, producto_cruz
+from mate import producto_matrices, normal_vector3, producto_matriz_vector, resta_vectores, producto_cruz,invert_matrix
 
 
 from obj import Obj
@@ -58,7 +58,8 @@ class Renderer(object):
         self.active_shader = None
         self.active_texture = None
         self.dirLight = [1, 0, 0]
-
+        self.glViewMatrix()
+        self.glProjectionMatrix()
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)
         self.glClear()
@@ -76,6 +77,17 @@ class Renderer(object):
         self.mx_height = (y+height)
         self.min_width = x
         self.min_height = y
+        self.viewportMatrix = [[width/2,0,0,x+width/2],[0,height/2,0,y+height/2],[0,0,0.5,0.5],[0,0,0,1]]
+
+    def glViewMatrix(self,translate =[0,0,0],rotate =[0,0,0]):
+        camMatrix = self.glCreateObjectMatrix(translate,rotate)
+        self.viewMatrix = invert_matrix(camMatrix) #Revisar inversa
+
+    def glProjectionMatrix(self,n=0.1,f=1000,fov=60):
+        aspectRatio = self.mx_width / self.mx_height
+        t = tan((fov *pi /180)/2 )*n
+        r = t * aspectRatio
+        self.projectionMatrix = [[(n/r),0,0,0],[0,(n/t),0,0],[0,0,-(f+n)/(f-n),-1],[0,0,-(2*f*n)/(f-n),0]]   
 
     def glColor(self, r, g, b):
         self.currentColor = color(r, g, b)
@@ -316,8 +328,11 @@ class Renderer(object):
             v2 = model.vertices[face[2][0] - 1]
 
             v0 = self.glTransform(v0, modelMatrix)
+            v0 = self.glCamTransform(v0)
             v1 = self.glTransform(v1, modelMatrix)
+            v1 = self.glCamTransform(v1)
             v2 = self.glTransform(v2, modelMatrix)
+            v2 = self.glCamTransform(v2)
 
             vt0 = model.texcoords[face[0][1] - 1]
             vt1 = model.texcoords[face[1][1] - 1]
@@ -332,6 +347,7 @@ class Renderer(object):
             if vertCount == 4:
                 v3 = model.vertices[face[3][0] - 1]
                 v3 = self.glTransform(v3, modelMatrix)
+                v3 = self.glCamTransform(v3)
                 vt3 = model.texcoords[face[3][1] - 1]
                 vn3 = model.normals[face[3][2] - 1]
                 self.glTriangle_bc(v0, v2, v3,txtC=(vt0,vt2,vt3),normals=(vn0,vn2,vn3))
@@ -341,6 +357,25 @@ class Renderer(object):
         v = [vertex[0], vertex[1], vertex[2], 1]
         vt = producto_matriz_vector(matrix, v)
 
+        vf = [vt[0] / vt[3],
+              vt[1] / vt[3],
+              vt[2] / vt[3]]
+
+        return vf
+
+        
+    def glCamTransform(self, vertex):
+
+        v = [vertex[0], vertex[1], vertex[2], 1]
+
+        v1 = producto_matrices(self.viewportMatrix,self.projectionMatrix)
+        v2 = producto_matrices(v1,self.viewMatrix)
+        vt = producto_matriz_vector(v2, v)
+
+        # v1 = producto_matriz_vector(self.viewportMatrix, v)
+        # v2 = producto_matriz_vector(self.projectionMatrix, v1)
+        # vt = producto_matriz_vector(self.viewMatrix, v2)
+        print(vt)
         vf = [vt[0] / vt[3],
               vt[1] / vt[3],
               vt[2] / vt[3]]
@@ -367,7 +402,7 @@ class Renderer(object):
 
         return producto_matrices(producto_matrices(pitchMatrix, yawnMatrix), rollMatrix)
 
-    def glCreateObjectMatrix(self, translate, rotate, scale):
+    def glCreateObjectMatrix(self, translate, rotate, scale = [1,1,1]):
 
         translation = [[1, 0, 0, translate[0]],
                        [0, 1, 0, translate[1]],

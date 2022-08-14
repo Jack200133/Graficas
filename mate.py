@@ -63,3 +63,22 @@ def inversa(a):
     for i in range(len(a)):
         result.append(-a[i])
     return result
+
+
+def invert_matrix(matrix):
+    """
+    Invert a matrix (adapted from http://www.mathsisfun.com/algebra/matrix-inverse.html)
+    """
+    n = len(matrix)
+    inverted = []
+    for i in range(n):
+        inverted.append([])
+        for j in range(n):
+            inverted[i].append(0)
+    for i in range(n):
+        inverted[i][i] = 1
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                inverted[j][i] = -matrix[i][j]/matrix[i][i]
+    return inverted
