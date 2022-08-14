@@ -59,7 +59,7 @@ class Renderer(object):
         self.active_texture = None
         self.dirLight = [1, 0, 0]
         self.glViewMatrix()
-        self.glProjectionMatrix()
+
         self.clearColor = color(0, 0, 0)
         self.currentColor = color(1, 1, 1)
         self.glClear()
@@ -78,6 +78,7 @@ class Renderer(object):
         self.min_width = x
         self.min_height = y
         self.viewportMatrix = [[width/2,0,0,x+width/2],[0,height/2,0,y+height/2],[0,0,0.5,0.5],[0,0,0,1]]
+        self.glProjectionMatrix()
 
     def glViewMatrix(self,translate =[0,0,0],rotate =[0,0,0]):
         camMatrix = self.glCreateObjectMatrix(translate,rotate)
@@ -368,14 +369,17 @@ class Renderer(object):
 
         v = [vertex[0], vertex[1], vertex[2], 1]
 
-        v1 = producto_matrices(self.viewportMatrix,self.projectionMatrix)
-        v2 = producto_matrices(v1,self.viewMatrix)
-        vt = producto_matriz_vector(v2, v)
+        # v1 = producto_matrices(self.viewportMatrix,self.projectionMatrix)
+        # v2 = producto_matrices(v1,self.viewMatrix)
+        # vt = producto_matriz_vector(v2, v)
 
-        # v1 = producto_matriz_vector(self.viewportMatrix, v)
-        # v2 = producto_matriz_vector(self.projectionMatrix, v1)
-        # vt = producto_matriz_vector(self.viewMatrix, v2)
+        v1 = producto_matriz_vector(self.viewMatrix, v)
+        print(v1)
+        v2 = producto_matriz_vector(self.projectionMatrix, v1)
+        print(v2)
+        vt = producto_matriz_vector(self.viewportMatrix, v2)
         print(vt)
+
         vf = [vt[0] / vt[3],
               vt[1] / vt[3],
               vt[2] / vt[3]]
@@ -443,8 +447,8 @@ class Renderer(object):
                 if u >= 0 and v >= 0 and w >= 0:
 
                     z = v0[2] * u + v1[2] * v + v2[2] * w
-                    if x < self.width and y < self.height:
-                        if z < self.zbuffer[x][y]:
+                    if 0<=x<self.width and 0<=y<self.height:
+                        if z < self.zbuffer[x][y] and -1 <= z <= 1:
                             self.zbuffer[x][y] = z
 
                             if self.active_shader != None:
