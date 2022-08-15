@@ -57,7 +57,7 @@ class Renderer(object):
 
         self.active_shader = None
         self.active_texture = None
-        self.dirLight = [1, 0, 0]
+        self.dirLight = [0, 0, -1]
         self.glViewMatrix()
 
         self.clearColor = color(0, 0, 0)
@@ -77,7 +77,10 @@ class Renderer(object):
         self.mx_height = (y+height)
         self.min_width = x
         self.min_height = y
-        self.viewportMatrix = [[width/2,0,0,x+width/2],[0,height/2,0,y+height/2],[0,0,0.5,0.5],[0,0,0,1]]
+        self.viewportMatrix = [[width/2,0,0,x+width/2],
+                                [0,height/2,0,y+height/2],
+                                [0,0,0.5,0.5],
+                                [0,0,0,1]]
         self.glProjectionMatrix()
 
     def glViewMatrix(self,translate =[0,0,0],rotate =[0,0,0]):
@@ -88,7 +91,10 @@ class Renderer(object):
         aspectRatio = self.mx_width / self.mx_height
         t = tan((fov *pi /180)/2 )*n
         r = t * aspectRatio
-        self.projectionMatrix = [[(n/r),0,0,0],[0,(n/t),0,0],[0,0,-(f+n)/(f-n),-1],[0,0,-(2*f*n)/(f-n),0]]   
+        self.projectionMatrix = [[(n/r),0,0,0],
+                                 [0,(n/t),0,0],
+                                 [0,0,-(f+n)/(f-n),-(2*f*n)/(f-n)],
+                                 [0,0,-1,0]]   
 
     def glColor(self, r, g, b):
         self.currentColor = color(r, g, b)
@@ -329,10 +335,11 @@ class Renderer(object):
             v2 = model.vertices[face[2][0] - 1]
 
             v0 = self.glTransform(v0, modelMatrix)
-            v0 = self.glCamTransform(v0)
             v1 = self.glTransform(v1, modelMatrix)
-            v1 = self.glCamTransform(v1)
             v2 = self.glTransform(v2, modelMatrix)
+            
+            v0 = self.glCamTransform(v0)
+            v1 = self.glCamTransform(v1)
             v2 = self.glCamTransform(v2)
 
             vt0 = model.texcoords[face[0][1] - 1]
@@ -374,11 +381,8 @@ class Renderer(object):
         # vt = producto_matriz_vector(v2, v)
 
         v1 = producto_matriz_vector(self.viewMatrix, v)
-        print(v1)
         v2 = producto_matriz_vector(self.projectionMatrix, v1)
-        print(v2)
         vt = producto_matriz_vector(self.viewportMatrix, v2)
-        print(vt)
 
         vf = [vt[0] / vt[3],
               vt[1] / vt[3],
@@ -406,7 +410,7 @@ class Renderer(object):
 
         return producto_matrices(producto_matrices(pitchMatrix, yawnMatrix), rollMatrix)
 
-    def glCreateObjectMatrix(self, translate, rotate, scale = [1,1,1]):
+    def glCreateObjectMatrix(self, translate= [0,0,0], rotate = [0,0,0], scale = [1,1,1]):
 
         translation = [[1, 0, 0, translate[0]],
                        [0, 1, 0, translate[1]],
