@@ -1,9 +1,7 @@
 import struct
 from math import cos, sin, pi, tan
 import random
-from mate import producto_matrices, normal_vector3, producto_matriz_vector, resta_vectores, producto_cruz,invert_matrix
-
-
+from mate import producto_matrices, normal_vector3, producto_matriz_vector, resta_vectores, producto_cruz,invert_matrix,getMatrixInverse
 from obj import Obj
 
 #V2 = namedtuple('Vertex2', ['x', 'y'])
@@ -86,6 +84,22 @@ class Renderer(object):
     def glViewMatrix(self,translate =[0,0,0],rotate =[0,0,0]):
         camMatrix = self.glCreateObjectMatrix(translate,rotate)
         self.viewMatrix = invert_matrix(camMatrix) #Revisar inversa
+
+    def glLookAt(self,eye,camPosition = [0,0,0]):
+        forward = resta_vectores(camPosition,eye)
+        forward = normal_vector3(forward)
+
+        right = producto_cruz([0,1,0],forward)
+        right = normal_vector3(right)
+
+        up = producto_cruz(forward,right)
+        up = normal_vector3(up)
+
+        camMatrix = [[right[0],up[0],forward[0],camPosition[0]],
+                     [right[1],up[1],forward[1],camPosition[1]],
+                     [right[2],up[2],forward[2],camPosition[2]],
+                     [0,0,0,1]]
+        self.viewMatrix = getMatrixInverse(camMatrix) #Revisar inversa
 
     def glProjectionMatrix(self,n=0.1,f=1000,fov=60):
         aspectRatio = self.mx_width / self.mx_height
@@ -300,13 +314,6 @@ class Renderer(object):
             flattTop(v1, vD, v2)
             pass
 
-        # self.glLine(int(v0[0]), int(v0[1]), int(
-        #     v1[0]), int(v1[1]), color(0, 0, 0))
-        # self.glLine(int(v1[0]), int(v1[1]), int(
-        #     v2[0]), int(v2[1]), color(0, 0, 0))
-        # self.glLine(int(v2[0]), int(v2[1]), int(
-        #     v0[0]), int(v0[1]), color(0, 0, 0))
-
     def gloutTriangle(self, v0, v1, v2, clr=None):
         # Scan Algorithm
         if v0[1] < v1[1]:
@@ -326,6 +333,7 @@ class Renderer(object):
         model = Obj(filename)
 
         modelMatrix = self.glCreateObjectMatrix(translate, rotate, scale)
+        rotatioMatrix = self.glCreateRotationMatrix(rotate[0],rotate[1],rotate[2])
 
         for face in model.faces:
 
@@ -338,9 +346,9 @@ class Renderer(object):
             v1 = self.glTransform(v1, modelMatrix)
             v2 = self.glTransform(v2, modelMatrix)
             
-            v0 = self.glCamTransform(v0)
-            v1 = self.glCamTransform(v1)
-            v2 = self.glCamTransform(v2)
+            vA = self.glCamTransform(v0)
+            vB = self.glCamTransform(v1)
+            vC = self.glCamTransform(v2)
 
             vt0 = model.texcoords[face[0][1] - 1]
             vt1 = model.texcoords[face[1][1] - 1]
@@ -349,16 +357,28 @@ class Renderer(object):
             vn0 = model.normals[face[0][2] - 1]
             vn1 = model.normals[face[1][2] - 1]
             vn2 = model.normals[face[2][2] - 1]
+            
+            vn0 = self.glDirTransform(vn0, rotatioMatrix)
+            vn1 = self.glDirTransform(vn1, rotatioMatrix)
+            vn2 = self.glDirTransform(vn2, rotatioMatrix)
 
-            self.glTriangle_bc(v0, v1, v2,txtC=(vt0,vt1,vt2),normals=(vn0,vn1,vn2))
+            self.glTriangle_bc(vA, vB, vC,
+                                verts=(v0,v1,v2),
+                                txtC=(vt0,vt1,vt2),
+                                normals=(vn0,vn1,vn2))
 
             if vertCount == 4:
                 v3 = model.vertices[face[3][0] - 1]
                 v3 = self.glTransform(v3, modelMatrix)
-                v3 = self.glCamTransform(v3)
+                vD = self.glCamTransform(v3)
                 vt3 = model.texcoords[face[3][1] - 1]
                 vn3 = model.normals[face[3][2] - 1]
-                self.glTriangle_bc(v0, v2, v3,txtC=(vt0,vt2,vt3),normals=(vn0,vn2,vn3))
+                vn3 = self.glDirTransform(vn3, rotatioMatrix)
+
+                self.glTriangle_bc(vA, vC, vD,
+                                    verts=(v0,v2,v3),
+                                    txtC=(vt0,vt2,vt3),
+                                    normals=(vn0,vn2,vn3))
 
     def glTransform(self, vertex, matrix):
 
@@ -371,7 +391,16 @@ class Renderer(object):
 
         return vf
 
-        
+    def glDirTransform(self,dirVector,rotMatrix):
+        v = [dirVector[0], dirVector[1], dirVector[2], 0]
+        vt = producto_matriz_vector(rotMatrix, v)
+
+        vf = [vt[0],
+              vt[1],
+              vt[2]]
+
+        return vf
+
     def glCamTransform(self, vertex):
 
         v = [vertex[0], vertex[1], vertex[2], 1]
@@ -428,7 +457,7 @@ class Renderer(object):
         final = producto_matrices(tr, scaleMat)
         return final
 
-    def glTriangle_bc(self, v0, v1, v2,txtC =(),normals=(), clr=None):
+    def glTriangle_bc(self, v0, v1, v2,verts=(),txtC =(),normals=(), clr=None):
         # bounding box
         minX = round(min(v0[0], v1[0], v2[0]))
         maxX = round(max(v0[0], v1[0], v2[0]))
@@ -436,7 +465,7 @@ class Renderer(object):
         maxY = round(max(v0[1], v1[1], v2[1]))
 
         triangleNormal = producto_cruz(
-            resta_vectores(v1, v0), resta_vectores(v2, v0))
+            resta_vectores(verts[1], verts[0]), resta_vectores(verts[2], verts[0]))
 
         triangleNormal = normal_vector3(triangleNormal)
 
