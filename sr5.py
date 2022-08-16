@@ -1,5 +1,5 @@
 from gl import Renderer, color
-from shaders import flat,gourad
+from shaders import flat,gourad,toon
 from texture import Texture
 
 render = Renderer()

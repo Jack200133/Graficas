@@ -82,8 +82,8 @@ class Renderer(object):
         self.glProjectionMatrix()
 
     def glViewMatrix(self,translate =[0,0,0],rotate =[0,0,0]):
-        camMatrix = self.glCreateObjectMatrix(translate,rotate)
-        self.viewMatrix = invert_matrix(camMatrix) #Revisar inversa
+        self.camMatrix = self.glCreateObjectMatrix(translate,rotate)
+        self.viewMatrix = invert_matrix(self.camMatrix) #Revisar inversa
 
     def glLookAt(self,eye,camPosition = [0,0,0]):
         forward = resta_vectores(camPosition,eye)
@@ -95,11 +95,11 @@ class Renderer(object):
         up = producto_cruz(forward,right)
         up = normal_vector3(up)
 
-        camMatrix = [[right[0],up[0],forward[0],camPosition[0]],
-                     [right[1],up[1],forward[1],camPosition[1]],
-                     [right[2],up[2],forward[2],camPosition[2]],
-                     [0,0,0,1]]
-        self.viewMatrix = getMatrixInverse(camMatrix) #Revisar inversa
+        self.camMatrix = [[right[0],up[0],forward[0],camPosition[0]],
+                            [right[1],up[1],forward[1],camPosition[1]],
+                            [right[2],up[2],forward[2],camPosition[2]],
+                            [0,0,0,1]]
+        self.viewMatrix = getMatrixInverse(self.camMatrix) #Revisar inversa
 
     def glProjectionMatrix(self,n=0.1,f=1000,fov=60):
         aspectRatio = self.mx_width / self.mx_height
