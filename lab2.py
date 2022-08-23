@@ -1,5 +1,5 @@
 from gl import Renderer, color
-from shaders import flat,gourad,toon,glow,void,inverso,algo
+from shaders import flat,gourad,toon,glow,void,inverso,algo,wim
 from texture import Texture
 
 render = Renderer()
@@ -39,7 +39,7 @@ render.active_shader = void
 render.glLoadModel("./rocket/rocket.obj",
                    translate=[3, -3,-10],
                    scale=[0.02, 0.02,0.02])
-render.active_shader = toon
+render.active_shader = wim
 render.glLoadModel("./rocket/rocket.obj",
                    translate=[0, -3,-10],
                    scale=[0.02, 0.02,0.02])
