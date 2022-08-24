@@ -55,6 +55,7 @@ class Renderer(object):
 
         self.active_shader = None
         self.active_texture = None
+        self.background = None
         self.dirLight = [0, 0, -1]
         self.glViewMatrix()
 
@@ -131,6 +132,21 @@ class Renderer(object):
             self.height)] for x in range(self.width)]
         self.zbuffer = [[float('inf') for y in range(
             self.height)] for x in range(self.width)]
+
+    def glClearBackground(self):
+        if self.background:
+            for x in range(self.min_width, self.mx_width+1):
+                    for y in range(self.min_height, self.mx_height+1):
+                        
+                        tU = (x - self.min_width)/ (self.mx_width-self.min_width)
+                        tV = (y - self.min_height)/ (self.mx_height-self.min_height)
+
+                        texColor = self.background.getColor(tU, tV)
+
+                        if texColor:
+                            self.glPoint(x,y,color(texColor[0],texColor[1],texColor[2]))
+
+
 
     def glLine(self, x0, y0, x1, y1, crl=None):
         dx = x1 - x0
