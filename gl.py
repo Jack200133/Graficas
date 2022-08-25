@@ -56,6 +56,7 @@ class Renderer(object):
         self.active_shader = None
         self.active_texture = None
         self.background = None
+        self.normal_map = None
         self.dirLight = [0, 0, -1]
         self.glViewMatrix()
 
@@ -480,10 +481,24 @@ class Renderer(object):
         minY = round(min(v0[1], v1[1], v2[1]))
         maxY = round(max(v0[1], v1[1], v2[1]))
 
-        triangleNormal = producto_cruz(
-            resta_vectores(verts[1], verts[0]), resta_vectores(verts[2], verts[0]))
+        edge1 = resta_vectores(verts[1], verts[0])
+        edge2 = resta_vectores(verts[2], verts[0])
 
+        triangleNormal = producto_cruz(edge1, edge2)
         triangleNormal = normal_vector3(triangleNormal)
+
+       
+        deltaUV1 = resta_vectores(txtC[1], txtC[0])
+        deltaUV2 = resta_vectores(txtC[2], txtC[0])
+        f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1])
+
+        tangent = [f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
+                    f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
+                    f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])]
+        tangent = normal_vector3(tangent)
+        
+        bitangent = producto_cruz(triangleNormal, tangent)
+        bitangent = normal_vector3(bitangent)
 
         # triangleNormal = np.cross(np.subtract(v1, v0), np.subtract(v2, v0))
         # # normalizar
@@ -506,7 +521,9 @@ class Renderer(object):
                                                             vcolor=clr or self.currentColor, 
                                                             texCoords = txtC,
                                                             normals=normals,
-                                                            triangleNormal=triangleNormal)
+                                                            triangleNormal=triangleNormal,
+                                                            tangent=tangent,
+                                                            bitangent=bitangent)
                                 self.glPoint(x, y, color(r, g, b))
                             else:
                                 self.glPoint(x, y, clr)

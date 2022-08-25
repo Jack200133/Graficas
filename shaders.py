@@ -1,4 +1,4 @@
-from mate import producto_punto, inversa
+from mate import producto_punto, inversa,normal_vector3,producto_matriz_vector
 
 
 def flat(render, **kwargs):
@@ -430,3 +430,62 @@ def wim(render, **kwargs):
 
     return r, g, b
 
+
+def Nmap(render, **kwargs):
+
+    u, v, w = kwargs["baryCoords"]
+    b, g, r = kwargs["vcolor"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+    tangent = kwargs["tangent"]
+    bitangent = kwargs["bitangent"]
+
+    b /= 255
+    g /= 255
+    r /= 255
+
+    # P = Au + Bv + Cw
+    tU = tA[0] * u + tB[0] * v + tC[0] * w
+    tV = tA[1] * u + tB[1] * v + tC[1] * w
+    if render.active_texture:
+
+        texColor = render.active_texture.getColor(tU, tV)
+
+        b *= texColor[2]
+        g *= texColor[1]
+        r *= texColor[0]
+
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
+                               nA[1] * u + nB[1] * v + nC[1] * w,
+                               nA[2] * u + nB[2] * v + nC[2] * w]
+    luz = inversa(render.dirLight)
+    if render.normal_map:
+        texNormal = render.normal_map.getColor(tU, tV)
+        texNormal = [texNormal[0] * 2 - 1,
+                    texNormal[1] * 2 - 1,
+                    texNormal[2] * 2 - 1]
+        texNormal = normal_vector3(texNormal)
+        
+        print(tangent)
+        print(bitangent)
+        print(triangleNormal)
+
+        tangentMatrix = [[tangent[0], bitangent[0], triangleNormal[0]],
+                        [tangent[1], bitangent[1], triangleNormal[1]],
+                        [tangent[2], bitangent[2], triangleNormal[2]]]
+        
+        texNormal = producto_matriz_vector(tangentMatrix, texNormal)
+        texNormal = normal_vector3(texNormal)
+
+        intensidad = producto_punto(texNormal, luz)
+    else:
+        intensidad = producto_punto(triangleNormal, luz)
+
+    b *= intensidad
+    g *= intensidad
+    r *= intensidad
+
+    if intensidad > 0:
+        return r, g, b
+    else:
+        return 0,0,0
