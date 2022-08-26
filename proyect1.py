@@ -4,27 +4,27 @@ from texture import Texture
 
 render = Renderer()
 height = 2080
-width = 2080
+width = 3080
 render.glCreateWindow(width, height)
 render.glClear()
 
 render.background = Texture('./models/space.bmp')
-render.normal_map = Texture('rocket/normal.bmp')
+#render.normal_map = Texture('models/ufo/normal.bmp')
 
 render.glClearBackground()
 
 
 render.active_shader = gourad
-render.active_texture = Texture("./rocket/rocket.bmp")
+#render.active_texture = Texture('models/ufo/mat.bmp')
 render.glLookAt([1, 0,-10], [0,0,0])
-render.glLoadModel("./rocket/rocket.obj",
+render.glLoadModel("models/ufo/ufo.obj",
                    translate=[-3, -3,-10],
                    scale=[0.02, 0.02,0.02])
 
 render.active_shader = Nmap
-render.active_texture = Texture("./rocket/rocket.bmp")
+#render.active_texture = Texture("models/ufo/mat.bmp")
 render.glLookAt([1, 0,-10], [0,0,0])
-render.glLoadModel("./rocket/rocket.obj",
+render.glLoadModel("models/ufo/ufo.obj",
                    translate=[3, -3,-10],
                    scale=[0.02, 0.02,0.02])
 # render.active_shader = void

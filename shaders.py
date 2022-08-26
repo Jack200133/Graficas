@@ -465,10 +465,6 @@ def Nmap(render, **kwargs):
                     texNormal[1] * 2 - 1,
                     texNormal[2] * 2 - 1]
         texNormal = normal_vector3(texNormal)
-        
-        print(tangent)
-        print(bitangent)
-        print(triangleNormal)
 
         tangentMatrix = [[tangent[0], bitangent[0], triangleNormal[0]],
                         [tangent[1], bitangent[1], triangleNormal[1]],
