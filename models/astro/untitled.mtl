@@ -1,0 +1,172 @@
+# Blender 3.2.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Material.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/angel/OneDrive/Escritorio/U/Sexto Semestre/models/textures/us_space_upperbody_g_col.png
+
+newmtl mtl_us_space_alpha_a
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_alpha_a_col.png
+map_Ks -o 0 -1 0 C:/~us_space_alpha_a_spc-rgb&us_~8133de57.png
+map_d -o 0 -1 0 C:/us_space_alpha_a_col.png
+map_refl -o 0 -1 0 C:/~us_space_alpha_a_spc-rgb&us_~8133de57.png
+
+newmtl mtl_us_space_alpha_aa
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_alpha_aa_col.png
+map_Ks -o 0 -1 0 C:/~us_space_alpha_a_spc-rgb&us_~8133de57.png
+map_d -o 0 -1 0 C:/us_space_alpha_aa_col.png
+map_refl -o 0 -1 0 C:/~us_space_alpha_a_spc-rgb&us_~8133de57.png
+
+newmtl mtl_us_space_boot_c
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_boot_c_col.png
+map_Ks -o 0 -1 0 C:/~us_space_boot_a_spc-rgb&us_s~cbd0df62.png
+map_d -o 0 -1 0 C:/us_space_boot_c_col.png
+map_refl -o 0 -1 0 C:/~us_space_boot_a_spc-rgb&us_s~cbd0df62.png
+
+newmtl mtl_us_space_glove_c
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_glove_c_col.png
+map_Ks -o 0 -1 0 C:/~us_space_glove_a_spc-rgb&us_~82d115c7.png
+map_d -o 0 -1 0 C:/us_space_glove_c_col.png
+map_refl -o 0 -1 0 C:/~us_space_glove_a_spc-rgb&us_~82d115c7.png
+map_Bump -o 0 -1 0 -bm 1.000000 C:/us_space_glove_a_nml.png
+
+newmtl mtl_us_space_headgear_b
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_headgear_b_col.png
+map_Ks -o 0 -1 0 C:/~us_space_headgear_b_spc-rgb&~e6ae714d.png
+map_d -o 0 -1 0 C:/us_space_headgear_b_col.png
+map_refl -o 0 -1 0 C:/~us_space_headgear_b_spc-rgb&~e6ae714d.png
+map_Bump -o 0 -1 0 -bm 1.000000 C:/us_space_headgear_a_nml.png
+
+newmtl mtl_us_space_headgear_g
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_headgear_g_col.png
+map_Ks -o 0 -1 0 C:/~us_space_headgear_a_spc-rgb&~7bf2f14b.png
+map_d -o 0 -1 0 C:/us_space_headgear_g_col.png
+map_refl -o 0 -1 0 C:/~us_space_headgear_a_spc-rgb&~7bf2f14b.png
+map_Bump -o 0 -1 0 -bm 1.000000 C:/us_space_headgear_a_nml.png
+
+newmtl mtl_us_space_loadout_b_mtl
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_headgear_g_col.png
+map_Ks -o 0 -1 0 C:/~us_space_headgear_a_spc-rgb&~7bf2f14b.png
+map_d -o 0 -1 0 C:/us_space_headgear_g_col.png
+map_refl -o 0 -1 0 C:/~us_space_headgear_a_spc-rgb&~7bf2f14b.png
+
+newmtl mtl_us_space_loadout_c
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_loadout_c_col.png
+map_Ks -o 0 -1 0 C:/~us_space_loadout_a_spc-rgb&u~67bb7e10.png
+map_d -o 0 -1 0 C:/us_space_loadout_c_col.png
+map_refl -o 0 -1 0 C:/~us_space_loadout_a_spc-rgb&u~67bb7e10.png
+
+newmtl mtl_us_space_loadout_d
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_loadout_d_col.png
+map_Ks -o 0 -1 0 C:/~us_space_loadout_b_spc-rgb&u~34acf32e.png
+map_d -o 0 -1 0 C:/us_space_loadout_d_col.png
+map_refl -o 0 -1 0 C:/~us_space_loadout_b_spc-rgb&u~34acf32e.png
+
+newmtl mtl_us_space_lowerbody_g
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_lowerbody_g_col.png
+map_Ks -o 0 -1 0 C:/~us_space_lowerbody_a_spc-rgb~bf531261.png
+map_d -o 0 -1 0 C:/us_space_lowerbody_g_col.png
+map_refl -o 0 -1 0 C:/~us_space_lowerbody_a_spc-rgb~bf531261.png
+map_Bump -o 0 -1 0 -bm 1.000000 C:/us_space_lowerbody_a_nml.png
+
+newmtl mtl_us_space_upperbody_g
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd -o 0 -1 0 C:/us_space_upperbody_g_col.png
+map_Ks -o 0 -1 0 C:/~us_space_upperbody_b_spc-rgb~64a2bcd7.png
+map_d -o 0 -1 0 C:/us_space_upperbody_g_col.png
+map_refl -o 0 -1 0 C:/~us_space_upperbody_b_spc-rgb~64a2bcd7.png
+map_Bump -o 0 -1 0 -bm 1.000000 C:/us_space_upperbody_b_nml.png

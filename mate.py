@@ -49,9 +49,12 @@ def resta_vectores(a, b):
 
 
 def normal_vector3(a):
-    return [a[0]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5),
-            a[1]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5),
-            a[2]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5)]
+    try:
+        return [a[0]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5),
+                a[1]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5),
+                a[2]/pow(a[0]**2 + a[1]**2 + a[2]**2,0.5)]
+    except:
+        return [0,0,0]
 
 
 def producto_punto(a, b):

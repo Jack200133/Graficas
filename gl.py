@@ -490,7 +490,10 @@ class Renderer(object):
        
         deltaUV1 = resta_vectores(txtC[1], txtC[0])
         deltaUV2 = resta_vectores(txtC[2], txtC[0])
-        f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1])
+        try:
+            f = 1.0 / (deltaUV1[0] * deltaUV2[1] - deltaUV2[0] * deltaUV1[1])
+        except ZeroDivisionError:
+            f= 0
 
         tangent = [f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
                     f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
