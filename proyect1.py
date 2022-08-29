@@ -36,8 +36,8 @@ render.glLoadModel("models/raven/model.obj",
                    rotate =[0,45,45],
                    scale=[0.004,0.004,0.004])
 render.active_shader = void
-render.active_texture = Texture('rocket/texture.bmp')
-render.glLoadModel("rocket/model.obj",
+render.active_texture = Texture('models/rocket/texture.bmp')
+render.glLoadModel("models/rocket/model.obj",
                    translate=[-6, -3,-10],
                    rotate =[0,45,45],
                    scale=[0.01,0.01,0.01])
