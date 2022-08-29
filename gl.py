@@ -370,14 +370,16 @@ class Renderer(object):
             vt0 = model.texcoords[face[0][1] - 1]
             vt1 = model.texcoords[face[1][1] - 1]
             vt2 = model.texcoords[face[2][1] - 1]
-
-            vn0 = model.normals[face[0][2] - 1]
-            vn1 = model.normals[face[1][2] - 1]
-            vn2 = model.normals[face[2][2] - 1]
-            
-            vn0 = self.glDirTransform(vn0, rotatioMatrix)
-            vn1 = self.glDirTransform(vn1, rotatioMatrix)
-            vn2 = self.glDirTransform(vn2, rotatioMatrix)
+            try: 
+                vn0 = model.normals[face[0][2] - 1]
+                vn1 = model.normals[face[1][2] - 1]
+                vn2 = model.normals[face[2][2] - 1]
+                
+                vn0 = self.glDirTransform(vn0, rotatioMatrix)
+                vn1 = self.glDirTransform(vn1, rotatioMatrix)
+                vn2 = self.glDirTransform(vn2, rotatioMatrix)
+            except IndexError:
+                vn0,vn1,vn2 = [1,1,1], [1,1,1], [1,1,1]
 
             self.glTriangle_bc(vA, vB, vC,
                                 verts=(v0,v1,v2),
@@ -389,8 +391,12 @@ class Renderer(object):
                 v3 = self.glTransform(v3, modelMatrix)
                 vD = self.glCamTransform(v3)
                 vt3 = model.texcoords[face[3][1] - 1]
-                vn3 = model.normals[face[3][2] - 1]
-                vn3 = self.glDirTransform(vn3, rotatioMatrix)
+                try:
+                    vn3 = model.normals[face[3][2] - 1]
+                    vn3 = self.glDirTransform(vn3, rotatioMatrix)
+                except IndexError:
+                    vn3 = [1,1,1]
+                
 
                 self.glTriangle_bc(vA, vC, vD,
                                     verts=(v0,v2,v3),

@@ -45,7 +45,10 @@ def producto_cruz(a, b):
 
 
 def resta_vectores(a, b):
-    return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+    r = []
+    for i in range(len(a)):
+        r.append(a[i] - b[i])
+    return r
 
 
 def normal_vector3(a):
